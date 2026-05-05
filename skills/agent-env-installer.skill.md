@@ -18,6 +18,7 @@ description: 负责在当前环境中安装和配置基于Agent体系的Agent、
 2. **精简过滤模式（Web / 纯前端等非Unity环境）**
    - 适用于 Vite, React 等通用前端或纯服务端 Node.js 项目。
    - **过滤策略**：必须在这个模式下剔除所有针对 Unity 的组件（如负责 Unity MonoBehaviour 生命周期、AssetBundle 打包、UGUI 解析等专用代理或技能）。
+   - **过滤实现**：不要只按目录名 `unity/` 过滤；还要按文件名关键字（如 `unity.*`, `unity-*.skill.md`, `unity-*.agent.md`）做二次筛除，因为上游资产可能把 Unity 专属文件放在通用目录下。
    - **保留策略**：只安装通用的体验设计（core-experience）、性能分析（performance）、代码审查（style-review）、纯逻辑算法（gameplay.agent 等）、以及 Git 协作等领域不可知的通用协作者。
 
 ## 执行步骤
