@@ -18,7 +18,8 @@ description: 专注为当前基于 Vite/React/前端 等Web工程建立官方推
    - 若缺失这些文件，GitHub Actions 中的 `vite build` 会直接失败。
 3. **确认 Node 版本与依赖兼容**
    - 工作流 Node 版本和项目依赖要匹配。
-   - 若本地开发环境较旧，但 workflow 使用 Node 20，则仍应确保锁定的依赖在 Node 20 下可稳定安装与构建。
+   - 若本地开发环境较旧，但 workflow 使用较新的 LTS（如 Node 22/24），则仍应确保锁定的依赖在对应版本下可稳定安装与构建。
+   - 2026 年后的 GitHub Actions 已开始弃用 Node 20 的 JavaScript action runtime；若继续沿用旧模板，应优先改为当前 LTS，并考虑设置 `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true` 以提前规避弃用告警。
 
 ## 实施经验与标准化步骤
 
@@ -35,7 +36,8 @@ description: 专注为当前基于 Vite/React/前端 等Web工程建立官方推
        pages: write
        id-token: write
      ```
-   - 确保 `Setup Node` 的版本能向下兼容最新的打包器生态（如指明 `node-version: 20` 防止 EBADENGINE 老旧报错）。
+   - 确保 `Setup Node` 的版本能向下兼容最新的打包器生态，优先使用当前 LTS（如 `node-version: 22` 或 `24`），不要在 2026 年后继续机械写死 `20`。
+   - 若 workflow 仍依赖官方 JavaScript actions，建议在工作流环境变量中补充 `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true`，减少 Node 20 runtime 弃用告警与后续切换风险。
    - 工作流须划分 `build` 与 `deploy`：
      - `build`: 负责安装 (`npm ci`)，构建 (`npm run build`) 并归档输出制品 (`uses: actions/upload-pages-artifact@v3` with `path: dist`)。
      - `deploy`: `needs: build` 的强校验，然后发布为官方服务 (`uses: actions/deploy-pages@v4`)。
@@ -65,6 +67,9 @@ description: 专注为当前基于 Vite/React/前端 等Web工程建立官方推
    - 本地随手装了只支持 Node 20+ 的依赖，但项目环境仍在 Node 18，会导致本地和 CI 行为不一致。
 4. **CSS 工具链半升级**
    - Tailwind、PostCSS、插件版本若不成套，Action 常在 CSS 阶段失败。
+5. **Actions Runtime 已经弃用 Node 20**
+   - 即使项目本身仍能在 Node 20 构建，官方 actions 也可能在日志中持续给出弃用告警。
+   - 看到这类告警时，不要只盯着 `setup-node`，还应检查是否需要切到当前 LTS，或显式设置 `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24=true`。
 
 ## 结束前验收清单
 
